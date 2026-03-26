@@ -66,14 +66,21 @@ timeline_events = [
         'qty': 600, 'rop': 1120, 'mode': 'truck', 'priority': 2
     },
 
-    # --- DAY 1360: End Production ---
+    # --- DAY 1360: Q8 ---
     {
         'date': 1360, 'action': 'set_reorder_policy', 
+        'warehouse': 'calopeia', 'factory': 'calopeia', 
+        'qty': 200, 'rop': 200, 'mode': 'truck', 'priority': 2
+    },
+
+    # --- DAY 1400: End Production ---
+    {
+        'date': 1400, 'action': 'set_reorder_policy', 
         'warehouse': 'calopeia', 'factory': 'calopeia', 
         'qty': 0, 'rop': 0, 'mode': 'truck', 'priority': 2
     },
     {
-        'date': 1360, 'action': 'set_reorder_policy', 
+        'date': 1400, 'action': 'set_reorder_policy', 
         'warehouse': 'sorange', 'factory': 'calopeia', 
         'qty': 0, 'rop': 0, 'mode': 'truck', 'priority': 1
     },
@@ -104,10 +111,24 @@ timeline_events = [
 
 print("Running Supply Chain Game Simulation...")
 # Added sales to the returned variables!
-balance, inventory, sales = startSimulation(timeline_events, plot=True)
+balance, inventory, sales, stockouts = startSimulation(timeline_events, plot=True)
 
 print("\n--- Simulation Complete ---")
 print(f"Final Cash Balance (Day 1460): ${balance[-1]:,.2f}")
 print(f"Final Inventory in Calopeia: {inventory[-1]['calopeia']['warehouse']} drums")
 
+if stockouts:
+    print("\n--- Stockout Report ---")
+    # Grouping stockouts by region for better readability
+    affected_regions = sorted(list(set(s['region'] for s in stockouts)))
 
+    for region in affected_regions:
+        print(f"\n>> Region: {region.upper()} <<")
+        print(f"{'Start Day':<10} | {'End Day':<10} | {'Duration':<10}")
+        print("-" * 35)
+        region_stockouts = [s for s in stockouts if s['region'] == region]
+        for s in sorted(region_stockouts, key=lambda x: x['start_date']):
+            duration = s['end_date'] - s['start_date'] + 1
+            print(f"{s['start_date']:<10} | {s['end_date']:<10} | {duration:<10} days")
+else:
+    print("\nNo stockouts occurred during the simulation.")

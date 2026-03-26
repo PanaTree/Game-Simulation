@@ -4,12 +4,12 @@ from helper import divideRoundUp, get_transport_details, generateDemand
 
 def startSimulation(events: list, plot=False):
     variables = intialise_variables()
-    balance_history, inventory_history, sales_history = simulate(variables, events)
+    balance_history, inventory_history, sales_history, stockouts = simulate(variables, events)
     
     if plot:
         plot_results(balance_history, inventory_history, sales_history, variables['start_date'])
         
-    return balance_history, inventory_history, sales_history
+    return balance_history, inventory_history, sales_history, stockouts
 
 def simulate(variable: dict, events: list):
     start_date = variable['start_date']
@@ -20,8 +20,10 @@ def simulate(variable: dict, events: list):
     sales_history = [] # NEW: Tracking sales history
     
     events = sorted(events, key=lambda x: x['date'])
-
     regions = ['calopeia', 'sorange', 'tyran', 'entworpe', 'fardo']
+
+    stockouts = []
+    stockout_start = {region: None for region in regions}
 
     # Initialize Factories and Warehouses
     factory = {region: {
@@ -239,12 +241,37 @@ def simulate(variable: dict, events: list):
             total_finished_drums += sum(t['quantity'] for t in inventory[r]['transit'])
         balance -= total_finished_drums * daily_holding_cost_rate
     
+        # Track stockouts (contiguous periods where inventory is zero)
+        for region in regions:
+            # Only track for active warehouses that have finished building
+            if region in regions_with_warehouse and inventory[region]['build_schedule'] == 0:
+                if inventory[region]['warehouse'] == 0:
+                    if stockout_start[region] is None:
+                        stockout_start[region] = current_date
+                else:
+                    if stockout_start[region] is not None:
+                        stockouts.append({
+                            'region': region,
+                            'start_date': stockout_start[region],
+                            'end_date': current_date - 1
+                        })
+                        stockout_start[region] = None
+
         balance_history.append(balance)
         sales_history.append(daily_sales) # NEW: Store daily sales
         inv_copy = {k: {'warehouse': v['warehouse'], 'transit': list(v['transit'])} for k, v in inventory.items()}
         inventory_history.append(inv_copy)
 
-    return balance_history, inventory_history, sales_history
+    # Close any open stockout periods at the end of the simulation
+    for region, s_date in stockout_start.items():
+        if s_date is not None:
+            stockouts.append({
+                'region': region,
+                'start_date': s_date,
+                'end_date': end_date - 1
+            })
+
+    return balance_history, inventory_history, sales_history, stockouts
 
 def plot_results(balance_history, inventory_history, sales_history, start_date):
     days = list(range(start_date, start_date + len(balance_history)))
