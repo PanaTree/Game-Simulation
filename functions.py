@@ -7,7 +7,7 @@ def startSimulation(events: list, plot=False):
     balance_history, inventory_history, sales_history, stockouts = simulate(variables, events)
     
     if plot:
-        plot_results(balance_history, inventory_history, sales_history, variables['start_date'])
+        plot_results(balance_history, inventory_history, sales_history, stockouts, variables['start_date'])
         
     return balance_history, inventory_history, sales_history, stockouts
 
@@ -273,14 +273,14 @@ def simulate(variable: dict, events: list):
 
     return balance_history, inventory_history, sales_history, stockouts
 
-def plot_results(balance_history, inventory_history, sales_history, start_date):
+def plot_results(balance_history, inventory_history, sales_history, stockouts, start_date):
     days = list(range(start_date, start_date + len(balance_history)))
     
-    # Increased figure height to fit 3 subplots cleanly
-    plt.figure(figsize=(14, 12)) 
+    # Increased figure height to fit 4 subplots cleanly
+    plt.figure(figsize=(14, 16)) 
     
     # 1. Cash Balance Plot
-    plt.subplot(3, 1, 1)
+    plt.subplot(4, 1, 1)
     plt.plot(days, balance_history, label="Cash Balance", color='green', linewidth=2)
     plt.title("Supply Chain Simulation Results")
     plt.ylabel("Balance ($)")
@@ -288,7 +288,7 @@ def plot_results(balance_history, inventory_history, sales_history, start_date):
     plt.legend()
     
     # 2. Inventory Plot
-    plt.subplot(3, 1, 2)
+    plt.subplot(4, 1, 2)
     regions = inventory_history[0].keys()
     for region in regions:
         region_inventory = [day_data[region]['warehouse'] for day_data in inventory_history]
@@ -300,7 +300,7 @@ def plot_results(balance_history, inventory_history, sales_history, start_date):
     plt.legend()
     
     # 3. Daily Sales Plot (NEW)
-    plt.subplot(3, 1, 3)
+    plt.subplot(4, 1, 3)
     sales_regions = sales_history[0].keys()
     for region in sales_regions:
         region_sales = [day_data[region] for day_data in sales_history]
@@ -308,10 +308,26 @@ def plot_results(balance_history, inventory_history, sales_history, start_date):
             # Using slight transparency (alpha) since daily sales can be spiky
             plt.plot(days, region_sales, label=f"{region.capitalize()} Sales Made", linewidth=1.5, alpha=0.8)
             
-    plt.xlabel("Day")
     plt.ylabel("Sales (Drums Fulfilled)")
     plt.grid(True, linestyle='--', alpha=0.7)
     plt.legend()
+
+    # 4. Stockout Plot (NEW)
+    plt.subplot(4, 1, 4)
+    all_regions = list(inventory_history[0].keys())
+    for i, region in enumerate(all_regions):
+        region_stockouts = [s for s in stockouts if s['region'] == region]
+        # Format for broken_barh: [(start, duration), ...]
+        xranges = [(s['start_date'], s['end_date'] - s['start_date'] + 1) for s in region_stockouts]
+        if xranges:
+            plt.broken_barh(xranges, (i - 0.4, 0.8), label=f"{region.capitalize()} Stockout", 
+                            facecolors=plt.cm.tab10(i % 10))
+            
+    plt.yticks(range(len(all_regions)), [r.capitalize() for r in all_regions])
+    plt.xlabel("Day")
+    plt.ylabel("Regions")
+    plt.title("Stockout Periods (Colored bars indicate zero inventory)")
+    plt.grid(True, axis='x', linestyle='--', alpha=0.7)
     
     plt.tight_layout()
     plt.show()

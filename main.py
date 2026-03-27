@@ -105,7 +105,7 @@ timeline_events = [
     {
         'date': 1430, 'action': 'set_reorder_policy', 
         'warehouse': 'sorange', 'factory': 'sorange', 
-        'qty': 0, 'rop': 0, 'mode': 'truck', 'priority': 1
+        'qty': 0, 'rop': 0, 'mode': 'truck', 'priority': 2
     },
 ]
 
