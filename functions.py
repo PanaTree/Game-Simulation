@@ -4,12 +4,22 @@ from helper import divideRoundUp, get_transport_details, generateDemand
 
 def startSimulation(events: list, plot=False):
     variables = intialise_variables()
-    balance_history, inventory_history, sales_history, stockouts = simulate(variables, events)
+    balance_history, inventory_history, production_history, stockouts = simulate(variables, events)
     
     if plot:
-        plot_results(balance_history, inventory_history, sales_history, stockouts, variables['start_date'])
+        plot_results(balance_history, inventory_history, production_history, stockouts, variables['start_date'])
         
-    return balance_history, inventory_history, sales_history, stockouts
+    return balance_history, inventory_history, production_history, stockouts
+
+def run_multiple_simulations(events: list, n: int = 100):
+    """Runs the simulation n times and returns the average final balance."""
+    final_balances = []
+    for _ in range(n):
+        # Run without plotting to save resources
+        balance_history, _, _, _ = startSimulation(events, plot=False)
+        final_balances.append(balance_history[-1])
+    
+    return sum(final_balances) / len(final_balances)
 
 def simulate(variable: dict, events: list):
     start_date = variable['start_date']
@@ -17,7 +27,7 @@ def simulate(variable: dict, events: list):
 
     balance_history = []
     inventory_history = []
-    sales_history = [] # NEW: Tracking sales history
+    production_history = [] 
     
     events = sorted(events, key=lambda x: x['date'])
     regions = ['calopeia', 'sorange', 'tyran', 'entworpe', 'fardo']
@@ -57,8 +67,6 @@ def simulate(variable: dict, events: list):
         if balance > 0:
             balance += balance * daily_interest_rate
             
-        daily_sales = {region: 0 for region in regions} # NEW: Reset daily sales to 0
-
         # 2. Process Timeline Events for today
         while len(events) > 0 and events[0]['date'] <= current_date:
             event = events.pop(0)
@@ -124,9 +132,6 @@ def simulate(variable: dict, events: list):
                     demand -= fulfilled
                     balance += fulfilled * variable['sale_price']
                     balance -= fulfilled * mail_cost
-                    
-                    # NEW: Track the fulfilled demand as a sale
-                    daily_sales[customer_region] += fulfilled 
                 
                 if demand <= 0: break
         
@@ -258,7 +263,7 @@ def simulate(variable: dict, events: list):
                         stockout_start[region] = None
 
         balance_history.append(balance)
-        sales_history.append(daily_sales) # NEW: Store daily sales
+        production_history.append({r: factory[r]['in_production'] + factory[r]['finished'] for r in regions})
         inv_copy = {k: {'warehouse': v['warehouse'], 'transit': list(v['transit'])} for k, v in inventory.items()}
         inventory_history.append(inv_copy)
 
@@ -271,9 +276,9 @@ def simulate(variable: dict, events: list):
                 'end_date': end_date - 1
             })
 
-    return balance_history, inventory_history, sales_history, stockouts
+    return balance_history, inventory_history, production_history, stockouts
 
-def plot_results(balance_history, inventory_history, sales_history, stockouts, start_date):
+def plot_results(balance_history, inventory_history, production_history, stockouts, start_date):
     days = list(range(start_date, start_date + len(balance_history)))
     
     # Increased figure height to fit 4 subplots cleanly
@@ -299,16 +304,15 @@ def plot_results(balance_history, inventory_history, sales_history, stockouts, s
     plt.grid(True, linestyle='--', alpha=0.7)
     plt.legend()
     
-    # 3. Daily Sales Plot (NEW)
+    # 3. Production Plot
     plt.subplot(4, 1, 3)
-    sales_regions = sales_history[0].keys()
-    for region in sales_regions:
-        region_sales = [day_data[region] for day_data in sales_history]
-        if any(sales > 0 for sales in region_sales):
-            # Using slight transparency (alpha) since daily sales can be spiky
-            plt.plot(days, region_sales, label=f"{region.capitalize()} Sales Made", linewidth=1.5, alpha=0.8)
+    prod_regions = production_history[0].keys()
+    for region in prod_regions:
+        region_prod = [day_data[region] for day_data in production_history]
+        if any(p > 0 for p in region_prod):
+            plt.plot(days, region_prod, label=f"{region.capitalize()} Production", linewidth=1.5)
             
-    plt.ylabel("Sales (Drums Fulfilled)")
+    plt.ylabel("Units in Production (Drums)")
     plt.grid(True, linestyle='--', alpha=0.7)
     plt.legend()
 
@@ -325,8 +329,7 @@ def plot_results(balance_history, inventory_history, sales_history, stockouts, s
             
     plt.yticks(range(len(all_regions)), [r.capitalize() for r in all_regions])
     plt.xlabel("Day")
-    plt.ylabel("Regions")
-    plt.title("Stockout Periods (Colored bars indicate zero inventory)")
+    plt.ylabel("Stockout Periods by Regions")
     plt.grid(True, axis='x', linestyle='--', alpha=0.7)
     
     plt.tight_layout()

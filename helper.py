@@ -49,11 +49,9 @@ def generateDemand(current_date: int):
         entworpe_demand = 0
         fardo_demand = 0
     else:
-        # Calculate how far along we are from day 640 to the day 1430 peak (0.0 to 1.0)
-        growth_progress = min(1.0, (current_date - 640) / (1430 - 640))
 
         # 2. Sorange: EXPLOSIVE Linear growth confirmed by Day 730 graph.
-        sorange_mean = max(0, 0.17*current_date - 109.4)
+        sorange_mean = max(0, 0.16*current_date - 109.4)
         sorange_demand = max(0, int(random.gauss(sorange_mean, sorange_mean * 0.2)))
 
         # 3. Tyran:
