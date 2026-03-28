@@ -36,10 +36,10 @@ def generateDemand(current_date: int):
         eol_multiplier = max(0.0, (1460 - current_date) / 30.0)
 
     # 1. Calopeia: Smooth trigonometric seasonal curve
-    calopeia_base = 39.5 - 28.5 * math.cos(2 * math.pi * current_date / 365)
+    calopeia_base = 39.19 - 30.89 * math.cos(2 * math.pi * current_date / 365)
     
     # Variance dynamically scales with the mean. 
-    calopeia_std_dev = 15 - 6 * math.cos(2 * math.pi * current_date / 365)
+    calopeia_std_dev = 15 - 8 * math.cos(2 * math.pi * current_date / 365)
     calopeia_demand = max(0, int(random.gauss(calopeia_base, calopeia_std_dev)))
 
     # Regions outside Calopeia ONLY begin tracking/ordering on Day 640
@@ -51,17 +51,17 @@ def generateDemand(current_date: int):
     else:
 
         # 2. Sorange: EXPLOSIVE Linear growth confirmed by Day 730 graph.
-        sorange_mean = max(0, 0.16*current_date - 109.4)
+        sorange_mean = max(0, 0.15*current_date - 97.45)
         sorange_demand = max(0, int(random.gauss(sorange_mean, sorange_mean * 0.2)))
 
         # 3. Tyran:
-        tyran_demand = max(0, int(random.gauss(16.8, 16)))
+        tyran_demand = max(0, int(random.gauss(19.4, 16.76)))
 
         # 4. Fardo: Highly variable.
-        fardo_demand = max(0, int(random.gauss(16.8, 16)))
+        fardo_demand = max(0, int(random.gauss(15.7, 16.77)))
 
         # 5. Entworpe: Reorder point of 250 units. 
-        entworpe_prob = 0.065
+        entworpe_prob = 0.044
         entworpe_demand = 250 if random.random() < entworpe_prob else 0
 
     return {
