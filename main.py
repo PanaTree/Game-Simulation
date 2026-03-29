@@ -1,122 +1,205 @@
 from functions import startSimulation, run_multiple_simulations
 
-timeline_events = [
-       
-
-    ### Calopeia ###
-
-     # --- DAY 730: Q1 Initial Setup ---
+cluade_events = [
+    ### Claude Plan ###
+    ### Keep at Calopeia ###
+    # --- DAY 730: Stage 1 ---
     {
         'date': 730, 'action': 'upgrade_capacity', 
-        'region': 'calopeia', 'capacity': 40
+        'region': 'calopeia', 'capacity': 80
     },
     {
         'date': 730, 'action': 'set_fulfillment', 
-        'warehouse': 'calopeia', 'serves': ['calopeia']
+        'warehouse': 'calopeia', 'serves': ['calopeia', 'tyran', 'entworpe']
     },
     {
         'date': 730, 'action': 'set_reorder_policy', 
         'warehouse': 'calopeia', 'factory': 'calopeia', 
-        'qty': 200, 'rop': 407, 'mode': 'truck', 'priority': 2
+        'qty': 200, 'rop': 1000, 'mode': 'truck', 'priority': 3
     },
 
-    # --- DAY 820: Q2 ---
-    {
-        'date': 820, 'action': 'set_reorder_policy', 
-        'warehouse': 'calopeia', 'factory': 'calopeia', 
-        'qty': 600, 'rop': 1052, 'mode': 'truck', 'priority': 2
-    },
-
-    # --- DAY 910: Q3 ---
-    {
-        'date': 910, 'action': 'set_reorder_policy', 
-        'warehouse': 'calopeia', 'factory': 'calopeia', 
-        'qty': 600, 'rop': 1120, 'mode': 'truck', 'priority': 2
-    },
-    # --- DAY 1000: Q4 ---
-    {
-        'date': 1000, 'action': 'set_reorder_policy', 
-        'warehouse': 'calopeia', 'factory': 'calopeia', 
-        'qty': 400, 'rop': 310, 'mode': 'truck', 'priority': 2
-    },
-    {
-        'date': 1000, 'action': 'set_reorder_policy', 
-        'warehouse': 'sorange', 'factory': 'calopeia', 
-        'qty': 400, 'rop': 200, 'mode': 'truck', 'priority': 1
-    },
-
-    # --- DAY 1090: Q5 ---
-    {
-        'date': 1090, 'action': 'set_reorder_policy', 
-        'warehouse': 'calopeia', 'factory': 'calopeia', 
-        'qty': 400, 'rop': 340, 'mode': 'truck', 'priority': 2
-    },
-
-    # --- DAY 1120: 60 Days Before Q6 ---
-    {
-        'date': 1120, 'action': 'set_reorder_policy', 
-        'warehouse': 'calopeia', 'factory': 'calopeia', 
-        'qty': 600, 'rop': 1052, 'mode': 'truck', 'priority': 2
-    },
-
-    # --- DAY 1270: Q7 ---
-    {
-        'date': 1270, 'action': 'set_reorder_policy', 
-        'warehouse': 'calopeia', 'factory': 'calopeia', 
-        'qty': 600, 'rop': 1120, 'mode': 'truck', 'priority': 2
-    },
-
-    # --- DAY 1360: Q8 ---
-    {
-        'date': 1360, 'action': 'set_reorder_policy', 
-        'warehouse': 'calopeia', 'factory': 'calopeia', 
-        'qty': 200, 'rop': 200, 'mode': 'truck', 'priority': 2
-    },
-
-    # --- DAY 1400: End Production ---
-    {
-        'date': 1400, 'action': 'set_reorder_policy', 
-        'warehouse': 'calopeia', 'factory': 'calopeia', 
-        'qty': 0, 'rop': 0, 'mode': 'truck', 'priority': 2
-    },
-    {
-        'date': 1400, 'action': 'set_reorder_policy', 
-        'warehouse': 'sorange', 'factory': 'calopeia', 
-        'qty': 0, 'rop': 0, 'mode': 'truck', 'priority': 1
-    },
-
-
-    ### Sorange ###
-     # --- DAY 730: Q1 Initial Setup ---
-    {
-        'date': 730, 'action': 'upgrade_capacity', 
-        'region': 'sorange', 'capacity': 40
-    },
+    ## Send to Sorange ###
     {
         'date': 730, 'action': 'set_fulfillment', 
         'warehouse': 'sorange', 'serves': ['sorange']
     },
     {
         'date': 730, 'action': 'set_reorder_policy', 
-        'warehouse': 'sorange', 'factory': 'sorange', 
-        'qty': 200, 'rop': 1000, 'mode': 'truck', 'priority': 2
+        'warehouse': 'sorange', 'factory': 'calopeia', 
+        'qty': 200, 'rop': 800, 'mode': 'truck', 'priority': 3
     },
-    # --- DAY 1430: End Production ---
+
+    # --- End Production ---
+    {
+        'date': 1400, 'action': 'set_reorder_policy', 
+        'warehouse': 'calopeia', 'factory': 'calopeia', 
+        'qty': 0, 'rop': 0, 'mode': 'truck', 'priority': 3
+    },
     {
         'date': 1430, 'action': 'set_reorder_policy', 
-        'warehouse': 'sorange', 'factory': 'sorange', 
-        'qty': 0, 'rop': 0, 'mode': 'truck', 'priority': 2
+        'warehouse': 'sorange', 'factory': 'calopeia', 
+        'qty': 0, 'rop': 0, 'mode': 'truck', 'priority': 3
+    },
+]
+
+no_entworpe_events = [
+    ### Claude Plan ###
+    ### Keep at Calopeia ###
+    # --- DAY 730: Stage 1 ---
+    {
+        'date': 730, 'action': 'upgrade_capacity', 
+        'region': 'calopeia', 'capacity': 80
+    },
+    {
+        'date': 730, 'action': 'set_fulfillment', 
+        'warehouse': 'calopeia', 'serves': ['calopeia', 'tyran']
+    },
+    {
+        'date': 730, 'action': 'set_reorder_policy', 
+        'warehouse': 'calopeia', 'factory': 'calopeia', 
+        'qty': 200, 'rop': 1000, 'mode': 'truck', 'priority': 4
+    },
+
+    {
+        'date': 1000, 'action': 'set_reorder_policy', 
+        'warehouse': 'calopeia', 'factory': 'calopeia', 
+        'qty': 200, 'rop': 1000, 'mode': 'truck', 'priority': 2
+    },
+
+    {
+        'date': 1180, 'action': 'set_reorder_policy', 
+        'warehouse': 'calopeia', 'factory': 'calopeia', 
+        'qty': 200, 'rop': 1000, 'mode': 'truck', 'priority': 4
+    },
+
+    ## Send to Sorange ###
+    {
+        'date': 730, 'action': 'set_fulfillment', 
+        'warehouse': 'sorange', 'serves': ['sorange']
+    },
+    {
+        'date': 730, 'action': 'set_reorder_policy', 
+        'warehouse': 'sorange', 'factory': 'calopeia', 
+        'qty': 200, 'rop': 1000, 'mode': 'truck', 'priority': 3
+    },
+
+    # --- End Production ---
+    {
+        'date': 1400, 'action': 'set_reorder_policy', 
+        'warehouse': 'calopeia', 'factory': 'calopeia', 
+        'qty': 0, 'rop': 0, 'mode': 'truck', 'priority': 3
+    },
+    {
+        'date': 1430, 'action': 'set_reorder_policy', 
+        'warehouse': 'sorange', 'factory': 'calopeia', 
+        'qty': 0, 'rop': 0, 'mode': 'truck', 'priority': 3
+    },
+]
+
+dynamic_events = [
+
+    ### Main Plan (Modifed From Claude) ###
+
+    ### Keep at Calopeia ###
+    # --- DAY 730: Stage 1 ---
+    {
+        'date': 730, 'action': 'upgrade_capacity', 
+        'region': 'calopeia', 'capacity': 80
+    },
+    {
+        'date': 730, 'action': 'set_fulfillment', 
+        'warehouse': 'calopeia', 'serves': ['calopeia', 'tyran']
+    },
+    {
+        'date': 730, 'action': 'set_reorder_policy', 
+        'warehouse': 'calopeia', 'factory': 'calopeia', 
+        'qty': 200, 'rop': 865, 'mode': 'truck', 'priority': 3
+    },
+    # --- DAY 1000: Stage 2 ---
+    {
+        'date': 1000, 'action': 'set_reorder_policy', 
+        'warehouse': 'calopeia', 'factory': 'calopeia', 
+        'qty': 200, 'rop': 455, 'mode': 'truck', 'priority': 3
+    },
+    # --- DAY 1180: Stage 3 ---
+    {
+        'date': 1180, 'action': 'set_reorder_policy', 
+        'warehouse': 'calopeia', 'factory': 'calopeia', 
+        'qty': 200, 'rop': 865, 'mode': 'truck', 'priority': 3
+    },
+    # --- DAY 1360: Stage 4 ---
+    {
+        'date': 1360, 'action': 'set_reorder_policy', 
+        'warehouse': 'calopeia', 'factory': 'calopeia', 
+        'qty': 200, 'rop': 560, 'mode': 'truck', 'priority': 3
+    },
+
+
+
+    ## Send to Sorange ###
+    {
+        'date': 730, 'action': 'set_fulfillment', 
+        'warehouse': 'sorange', 'serves': ['sorange']
+    },
+    {
+        'date': 730, 'action': 'set_reorder_policy', 
+        'warehouse': 'sorange', 'factory': 'calopeia', 
+        'qty': 200, 'rop': 800, 'mode': 'truck', 'priority': 3
+    },
+    {
+        'date': 730, 'action': 'set_reorder_policy', 
+        'warehouse': 'calopeia', 'factory': 'calopeia', 
+        'qty': 200, 'rop': 865, 'mode': 'truck', 'priority': 3
+    },
+    # --- DAY 1000: Stage 2 ---
+    {
+        'date': 1000, 'action': 'set_reorder_policy', 
+        'warehouse': 'calopeia', 'factory': 'calopeia', 
+        'qty': 200, 'rop': 455, 'mode': 'truck', 'priority': 3
+    },
+    # --- DAY 1180: Stage 3 ---
+    {
+        'date': 1180, 'action': 'set_reorder_policy', 
+        'warehouse': 'calopeia', 'factory': 'calopeia', 
+        'qty': 200, 'rop': 865, 'mode': 'truck', 'priority': 3
+    },
+    # --- DAY 1360: Stage 4 ---
+    {
+        'date': 1360, 'action': 'set_reorder_policy', 
+        'warehouse': 'calopeia', 'factory': 'calopeia', 
+        'qty': 200, 'rop': 560, 'mode': 'truck', 'priority': 3
+    },
+
+    # --- End Production ---
+    {
+        'date': 1400, 'action': 'set_reorder_policy', 
+        'warehouse': 'calopeia', 'factory': 'calopeia', 
+        'qty': 0, 'rop': 0, 'mode': 'truck', 'priority': 3
+    },
+    {
+        'date': 1430, 'action': 'set_reorder_policy', 
+        'warehouse': 'sorange', 'factory': 'calopeia', 
+        'qty': 0, 'rop': 0, 'mode': 'truck', 'priority': 3
     },
 ]
 
 if __name__ == "__main__":
-    # print("Running Single Simulation with Plots...")
-    # balance, inventory, production, stockouts = startSimulation(timeline_events, plot=True)
-
-    # print("\n--- Single Run Results ---")
-    # print(f"Final Cash Balance: ${balance[-1]:,.2f}")
-
-    print("\nRunning Monte Carlo Simulation (N=100)...")
     iterations = 100
-    avg_balance = run_multiple_simulations(timeline_events, n=iterations)
-    print(f"Average Final Balance over {iterations} runs: ${avg_balance:,.2f}")
+
+    print(f"\nRunning Monte Carlo Simulation (N={iterations}) for Claude's Static ROP Plan...")
+    final_balance = run_multiple_simulations(cluade_events, n=iterations)
+    print(f"Average Balance over {iterations} runs: ${sum(final_balance)/len(final_balance):,.2f}")
+    print(f"Minimum Balance over {iterations} runs: ${min(final_balance):,.2f}")
+    print(f"Maximum Balance over {iterations} runs: ${max(final_balance):,.2f}")
+
+    print(f"\nRunning Monte Carlo Simulation (N={iterations}) for Static ROP No Entworpe Plan...")
+    final_balance = run_multiple_simulations(no_entworpe_events, n=iterations)
+    print(f"Average Balance over {iterations} runs: ${sum(final_balance)/len(final_balance):,.2f}")
+    print(f"Minimum Balance over {iterations} runs: ${min(final_balance):,.2f}")
+    print(f"Maximum Balance over {iterations} runs: ${max(final_balance):,.2f}")
+
+    print(f"\nRunning Monte Carlo Simulation (N={iterations}) for Team's Dynamic ROP Plan...")
+    final_balance = run_multiple_simulations(dynamic_events, n=iterations)
+    print(f"Average Balance over {iterations} runs: ${sum(final_balance)/len(final_balance):,.2f}")
+    print(f"Minimum Balance over {iterations} runs: ${min(final_balance):,.2f}")
+    print(f"Maximum Balance over {iterations} runs: ${max(final_balance):,.2f}")

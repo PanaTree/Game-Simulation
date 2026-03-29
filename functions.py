@@ -1,3 +1,4 @@
+import random
 import matplotlib.pyplot as plt
 from variables import intialise_variables
 from helper import divideRoundUp, get_transport_details, generateDemand
@@ -19,7 +20,7 @@ def run_multiple_simulations(events: list, n: int = 100):
         balance_history, _, _, _ = startSimulation(events, plot=False)
         final_balances.append(balance_history[-1])
     
-    return sum(final_balances) / len(final_balances)
+    return final_balances
 
 def simulate(variable: dict, events: list):
     start_date = variable['start_date']
@@ -202,9 +203,12 @@ def simulate(variable: dict, events: list):
                 
                 # If multiple warehouses triggered, prioritize them!
                 if candidate_orders:
-                    # Sort by priority integer descending (e.g., Priority 2 evaluated before Priority 1)
-                    candidate_orders.sort(key=lambda x: x['priority'], reverse=True)
-                    best_order = candidate_orders[0]
+                    # Find the maximum priority among candidates
+                    max_priority = max(order['priority'] for order in candidate_orders)
+                    # Filter for all orders that share this maximum priority
+                    best_candidates = [order for order in candidate_orders if order['priority'] == max_priority]
+                    # Randomly select one from the highest priority candidates
+                    best_order = random.choice(best_candidates)
                     
                     # Deduct full cost upfront
                     balance -= best_order['total_cost']
