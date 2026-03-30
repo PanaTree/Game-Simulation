@@ -1,28 +1,44 @@
 import random
+import pandas as pd
 import matplotlib.pyplot as plt
 from variables import intialise_variables
 from helper import divideRoundUp, get_transport_details, generateDemand
 
-def startSimulation(events: list, plot=False):
+def startSimulation(events: list, plot=False, use_excel_demand=False, excel_data=None):
     variables = intialise_variables()
-    balance_history, inventory_history, production_history, stockouts = simulate(variables, events)
+    
+    # Load Excel data if requested and not already provided (e.g., passed from run_multiple_simulations)
+    if use_excel_demand and excel_data is None:
+        try:
+            excel_data = pd.read_excel("Demand for each destination region.xlsx", index_col=0).to_dict('index')
+        except Exception as e:
+            print(f"Notice: Could not load Excel demand file: {e}")
+
+    balance_history, inventory_history, production_history, stockouts = simulate(variables, events, excel_data)
     
     if plot:
         plot_results(balance_history, inventory_history, production_history, stockouts, variables['start_date'])
         
     return balance_history, inventory_history, production_history, stockouts
 
-def run_multiple_simulations(events: list, n: int = 100):
+def run_multiple_simulations(events: list, n: int = 100, use_excel_demand=False):
     """Runs the simulation n times and returns the average final balance."""
+    excel_data = None
+    if use_excel_demand:
+        try:
+            excel_data = pd.read_excel("demand for each region.xlsx", index_col=0).to_dict('index')
+        except Exception as e:
+            print(f"Notice: Could not load Excel demand for Monte Carlo: {e}")
+            
     final_balances = []
     for _ in range(n):
         # Run without plotting to save resources
-        balance_history, _, _, _ = startSimulation(events, plot=False)
+        balance_history, _, _, _ = startSimulation(events, plot=False, use_excel_demand=use_excel_demand, excel_data=excel_data)
         final_balances.append(balance_history[-1])
     
     return final_balances
 
-def simulate(variable: dict, events: list):
+def simulate(variable: dict, events: list, excel_data: dict = None):
     start_date = variable['start_date']
     end_date = variable['end_date']
 
@@ -107,7 +123,11 @@ def simulate(variable: dict, events: list):
                 shipment_plan[wh_region] = event['serves']
 
         # 3. Simulate Sales & Customer Fulfillment
-        demands = generateDemand(current_date)
+        if isinstance(excel_data, dict) and current_date in excel_data:
+            demands = excel_data[current_date]
+        else:
+            demands = generateDemand(current_date)
+            
         for customer_region, demand in demands.items():
             if demand <= 0: continue
             
