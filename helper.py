@@ -54,7 +54,7 @@ def generateDemand(current_date: int):
         sorange_demand = max(0, int(random.gauss(sorange_mean, sorange_mean * 0.2)))
 
         # 3. Tyran:
-        tyran_demand = max(0, int(random.gauss(19.7, 16.76)))
+        tyran_demand = max(0, int(random.gauss(16.78, 16.22)))
 
         # 4. Fardo: Highly variable.
         fardo_demand = max(0, int(random.gauss(15.7, 16.77)))
